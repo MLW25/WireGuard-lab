@@ -1,0 +1,56 @@
+1.) Sign up for a new DigitalOcean account and claim the free $200 credit.
+2.) Create a basic Ubuntu 20.04 droplet using a regular Intel CPU.
+3.)Open the droplet console and install the required tools. Use the command: sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+4.)Add the Docker GPG key: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+5.)Add the Docker repository using this code: sudo add-apt-repository \
+"deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+$(lsb_release -cs) \
+stable"
+6.) Verify the repo is set correctly using this command:apt-cache policy docker-ce
+7.) Install docker using this code: sudo apt install docker-ce -y
+8.) Install Docker Compose: sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+9.) Apply executable permissions using: sudo chmod +x /usr/local/bin/docker-compose
+10.) Make a wireguard Directory using this code: mkdir -p ~/wireguard/
+11.) Create a config directory inside it using this code: mkdir -p ~/wireguard/config/
+12.) Open the Docker Compose file for editing: nano ~/wireguard/docker-compose.yml
+13.) Paste the following text: version: '3.8'
+services:
+  wireguard:
+ container_name: wireguard
+ image: linuxserver/wireguard
+ environment:
+PUID: 1000
+PGID: 1000
+TZ: America/Chicago
+SERVERURL: 64.23.128.177
+SERVERPORT: 51820
+ PEERS: pc1,pc2,phone1
+PEERDNS: auto
+INTERNAL_SUBNET: 10.0.0.0
+ ports:
+ - 51820:51820/udp
+ volumes:
+- type: bind
+source: ./config/
+target: /config/
+- type: bind
+source: /lib/modules
+ target: /lib/modules
+restart: always
+cap_add:
+- NET_ADMIN
+- SYS_MODULE
+sysctls:
+net.ipv4.conf.all.src_valid_mark: 1
+14.) Move into the WireGuard directory using the code: cd ~/wireguard/
+15.) Start the WireGuard container:docker-compose up -d
+16.) Download the WireGuard mobile app.
+17.) Tap the plus (+) sign and choose Scan from QR code.
+18.) In the droplet console, run this to view the QR code: docker-compose logs -f wireguard
+19.) Scan it with your phone, activate the VPN, and visit ipleak.net to confirm your IP address has changed.
+20.) To connect a laptop. In the droplet console, navigate to your config directory and open the peer config file with nano.
+21.) Copy the entire config contents.
+22.) Create a new file in VS Code, paste the configuration, and save it.
+23.) Install the WireGuard desktop app on your laptop and import the file you created.
+24.) Activate the tunnel and check ipleak.net again to verify that the VPN is working.
+
